@@ -37,7 +37,7 @@ int main() {
     threads.emplace_back(funcThread, std::cref(args[i]), std::ref(logger));
   }
 
-  // wait for all threads to finish
+// wait for all threads to finish
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
