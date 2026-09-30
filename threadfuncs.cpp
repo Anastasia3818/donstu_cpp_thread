@@ -7,6 +7,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+std::atomic<int> counter{0};
+
 
 Logger::Logger(const std::string& filename)
   : file_(filename, std::ios::out | std::ios::trunc)
@@ -50,6 +52,10 @@ void funcThread(const ThreadArgs& args, Logger& logger) {
 
     // Задание 8: пишем через logger, результат не проверяем пока
     logger.writeLine(oss.str());
+    // ЗАДАНИЕ 20: 100000 инкрементов от каждого потока
+    for (int k = 0; k < 100000; ++k) {
+      counter++;
+    }
 
     // imitation of useful work
     std::this_thread::sleep_for(std::chrono::milliseconds(100));

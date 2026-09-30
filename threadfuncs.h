@@ -8,11 +8,15 @@
 #include <mutex>
 #include <fstream>
 
-#include <sys/types.h>   // pid_t
+#include <sys/types.h>
+#include <atomic>
+   // pid_t
 
 // count of threads and iterations
 inline constexpr int COUNT_THREADS    = 4;
 inline constexpr int COUNT_ITERATIONS = 3;
+// ЗАДАНИЕ 20: глобальный счётчик (пока обычный int)
+extern std::atomic<int> counter;
 
 // args for thread
 struct ThreadArgs {

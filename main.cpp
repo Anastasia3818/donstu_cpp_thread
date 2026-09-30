@@ -41,6 +41,9 @@ int main() {
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
+  // ЗАДАНИЕ 20: выводим итоговое значение счётчика
+  std::cout << "counter = " << counter
+            << " (expected " << COUNT_THREADS * 100000 << ")\n";
 
   logger.writeLine("main: all threads finished, file closed");
   return 0;
