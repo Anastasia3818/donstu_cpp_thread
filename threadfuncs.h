@@ -9,6 +9,7 @@
 #include <fstream>
 #include <atomic>
 #include <future>
+#include <condition_variable>
 
 #include <sys/types.h>
 
@@ -39,16 +40,20 @@ private:
   std::mutex       mutex_;
 };
 
-// обычная функция потока
+// обычная функция потока (блок 7)
 void funcThread(const ThreadArgs& args, Logger& logger);
 
-// ЗАДАНИЕ 14/16: поток с promise
+// ЗАДАНИЕ 14/16: поток с promise (блок 9)
 void funcThreadWithResult(const ThreadArgs& args,
                           Logger& logger,
                           std::promise<std::string> prom);
 
-// ЗАДАНИЕ 16: поток для std::async
+// ЗАДАНИЕ 16: поток для std::async (блок 9)
 std::string funcThreadReturning(const ThreadArgs& args, Logger& logger);
+
+// ЗАДАНИЕ 21: производитель-потребитель (блок 10)
+void producer(Logger& logger);
+void consumer(Logger& logger);
 
 pid_t getThreadID();
 void about();

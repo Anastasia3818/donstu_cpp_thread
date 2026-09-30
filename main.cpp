@@ -19,7 +19,7 @@ int main() {
     logger.writeLine(oss.str());
   }
 
-  // ---- args ----
+  // ---- args для обычных потоков ----
   std::vector<ThreadArgs> args(COUNT_THREADS);
   for (int i = 0; i < COUNT_THREADS; ++i) {
     std::ostringstream oss;
@@ -28,7 +28,7 @@ int main() {
     args[i].tag = oss.str();
   }
 
-  // ---- обычные потоки ----
+  // ---- обычные потоки (блок 7) ----
   std::vector<std::thread> threads;
   threads.reserve(COUNT_THREADS);
 
@@ -45,7 +45,7 @@ int main() {
 
   logger.writeLine("main: all threads finished, file closed");
 
-  // ---- ЗАДАНИЕ 14/16: promise/future ----
+  // ---- ЗАДАНИЕ 14/16: promise/future (блок 9) ----
   std::cout << "\n--- Блок 9: promise/future ---\n";
 
   std::promise<std::string> prom;
@@ -61,7 +61,7 @@ int main() {
 
   tWithResult.join();
 
-  // ---- ЗАДАНИЕ 16: std::async ----
+  // ---- ЗАДАНИЕ 16: std::async (блок 9) ----
   std::cout << "\n--- Блок 9: std::async ---\n";
 
   std::future<std::string> fut2 = std::async(std::launch::async,
@@ -71,6 +71,18 @@ int main() {
 
   std::string result2 = fut2.get();
   std::cout << "got from thread (async): " << result2 << "\n";
+
+  // ---- ЗАДАНИЕ 21: производитель-потребитель (блок 10) ----
+  std::cout << "\n--- Блок 10: producer/consumer ---\n";
+  logger.writeLine("--- producer/consumer ---");
+
+  std::thread tProducer(producer, std::ref(logger));
+  std::thread tConsumer(consumer, std::ref(logger));
+
+  tProducer.join();
+  tConsumer.join();
+
+  std::cout << "producer and consumer finished\n";
 
   logger.writeLine("main: block 9 done");
   return 0;
