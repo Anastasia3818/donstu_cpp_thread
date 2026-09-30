@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <sstream>
+#include <functional>
 
 #include "threadfuncs.h"
 
@@ -10,18 +12,24 @@ int main() {
   // Open log file
   Logger logger("output.log");
 
-  std::cout << "main: pid = " << getThreadID()
-            << ", opened file: 'output.log'\n";
+  // Задание 8: пишем в лог через logger.writeLine
+  {
+    std::ostringstream oss;
+    oss << "main: pid = " << getThreadID()
+        << ", opened file: 'output.log'";
+    logger.writeLine(oss.str());
+  }
 
-  // args for threads
-  std::vector<ThreadArgs> args = {
-    {1, "First"},
-    {2, "Second"},
-    {3, "Third"},
-    {4, "Fourth"},
-  };
+  // Задание 7: формируем теги циклом T0..T3 вместо ручного списка
+  std::vector<ThreadArgs> args(COUNT_THREADS);
+  for (int i = 0; i < COUNT_THREADS; ++i) {
+    std::ostringstream oss;
+    oss << "T" << i;
+    args[i].id  = i;
+    args[i].tag = oss.str();
+  }
 
-  // thread are starting
+  // threads are starting
   std::vector<std::thread> threads;
   threads.reserve(COUNT_THREADS);
 
@@ -29,12 +37,11 @@ int main() {
     threads.emplace_back(funcThread, std::cref(args[i]), std::ref(logger));
   }
 
-  // wait for stop all threads
+  // wait for all threads to finish
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
 
-  // close file automatically
-  std::cout << "main: all threads finished, file closed\n";
+  logger.writeLine("main: all threads finished, file closed");
   return 0;
 }

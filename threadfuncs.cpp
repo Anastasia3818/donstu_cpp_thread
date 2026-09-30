@@ -1,17 +1,12 @@
 #include "threadfuncs.h"
-#include "threadfuncs.h"
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <sstream>
 #include <iostream>
-// ... остальные, если есть
 #include <thread>
 #include <chrono>
-#include <sstream>
-#include <iostream>
-// ... остальные, что уже есть
 
 Logger::Logger(const std::string& filename)
   : file_(filename, std::ios::out | std::ios::trunc)
@@ -22,21 +17,19 @@ Logger::Logger(const std::string& filename)
 }
 
 Logger::~Logger() {
-  // std::ofstream close file here automatically
+  // std::ofstream closes the file automatically
 }
 
-void Logger::writeLine(const std::string& msg) {
+// Задание 6: возвращаем bool — true при успешной записи
+bool Logger::writeLine(const std::string& msg) {
   std::lock_guard<std::mutex> lock(mutex_);
   file_ << msg;
   file_.flush();
-  if (!file_) {
-    std::cerr << "write failed: " << msg << "\n";
-  }
+  return static_cast<bool>(file_);
 }
 
 pid_t getThreadID() {
   return static_cast<pid_t>(::syscall(SYS_gettid));
-  //return GetCurrentThreadId();
 }
 
 void about() {
@@ -47,12 +40,15 @@ void funcThread(const ThreadArgs& args, Logger& logger) {
   for (int i = 0; i < COUNT_ITERATIONS; ++i) {
     std::ostringstream oss;
 
+    // Задание 12: добавляем std::this_thread::get_id()
     oss << "[tag = " << args.tag
-        << "] pid = "  << ::getpid()
-        << " ppid = "  << ::getppid()
-        << " tid = "   << getThreadID()
-        << " iter = "  << i
-        << "\n";
+        << "] std::thread::id = " << std::this_thread::get_id()
+        << " sys tid = "         << getThreadID()
+        << " pid = "             << ::getpid()
+        << " ppid = "            << ::getppid()
+        << " iter = "            << i;
+
+    // Задание 8: пишем через logger, результат не проверяем пока
     logger.writeLine(oss.str());
 
     // imitation of useful work

@@ -1,17 +1,18 @@
 #pragma once
+
 #include <thread>
 #include <chrono>
 #include <sstream>
 #include <iostream>
-// ... остальные, что уже есть
-
 #include <string>
 #include <mutex>
 #include <fstream>
 
+#include <sys/types.h>   // pid_t
+
 // count of threads and iterations
-constexpr int COUNT_THREADS    = 4;
-constexpr int COUNT_ITERATIONS = 3;
+inline constexpr int COUNT_THREADS    = 4;
+inline constexpr int COUNT_ITERATIONS = 3;
 
 // args for thread
 struct ThreadArgs {
@@ -25,8 +26,8 @@ public:
   explicit Logger(const std::string& filename);
   ~Logger();
 
-  // write line with mutex
-  void writeLine(const std::string& msg);
+  // write line with mutex; returns true on success
+  bool writeLine(const std::string& msg);
 
   // block copy and move
   Logger(const Logger&)            = delete;
@@ -43,5 +44,5 @@ void funcThread(const ThreadArgs& args, Logger& logger);
 // get system TID for current linux thread
 pid_t getThreadID();
 
-// healline of software
+// headline of software
 void about();
