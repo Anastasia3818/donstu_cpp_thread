@@ -1,4 +1,9 @@
 #pragma once
+#include <thread>
+#include <chrono>
+#include <sstream>
+#include <iostream>
+// ... остальные, что уже есть
 
 #include <string>
 #include <mutex>

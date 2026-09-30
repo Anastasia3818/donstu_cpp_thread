@@ -1,12 +1,17 @@
-// threadfuncs.cpp
+#include "threadfuncs.h"
 #include "threadfuncs.h"
 
-#include <iostream>
-#include <sstream>
 #include <unistd.h>
-#include <syscall.h>
-//#include <windows.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
+#include <sstream>
+#include <iostream>
+// ... остальные, если есть
+#include <thread>
+#include <chrono>
+#include <sstream>
+#include <iostream>
+// ... остальные, что уже есть
 
 Logger::Logger(const std::string& filename)
   : file_(filename, std::ios::out | std::ios::trunc)
