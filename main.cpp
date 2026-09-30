@@ -3,16 +3,15 @@
 #include <thread>
 #include <sstream>
 #include <functional>
+#include <future>
 
 #include "threadfuncs.h"
 
 int main() {
   about();
 
-  // Open log file
   Logger logger("output.log");
 
-  // Задание 8: пишем в лог через logger.writeLine
   {
     std::ostringstream oss;
     oss << "main: pid = " << getThreadID()
@@ -20,7 +19,7 @@ int main() {
     logger.writeLine(oss.str());
   }
 
-  // Задание 7: формируем теги циклом T0..T3 вместо ручного списка
+  // ---- args ----
   std::vector<ThreadArgs> args(COUNT_THREADS);
   for (int i = 0; i < COUNT_THREADS; ++i) {
     std::ostringstream oss;
@@ -29,7 +28,7 @@ int main() {
     args[i].tag = oss.str();
   }
 
-  // threads are starting
+  // ---- обычные потоки ----
   std::vector<std::thread> threads;
   threads.reserve(COUNT_THREADS);
 
@@ -37,14 +36,42 @@ int main() {
     threads.emplace_back(funcThread, std::cref(args[i]), std::ref(logger));
   }
 
-// wait for all threads to finish
   for (auto& t : threads) {
     if (t.joinable()) t.join();
   }
-  // ЗАДАНИЕ 20: выводим итоговое значение счётчика
+
   std::cout << "counter = " << counter
             << " (expected " << COUNT_THREADS * 100000 << ")\n";
 
   logger.writeLine("main: all threads finished, file closed");
+
+  // ---- ЗАДАНИЕ 14/16: promise/future ----
+  std::cout << "\n--- Блок 9: promise/future ---\n";
+
+  std::promise<std::string> prom;
+  std::future<std::string>  fut = prom.get_future();
+
+  std::thread tWithResult(funcThreadWithResult,
+                          std::cref(args[0]),
+                          std::ref(logger),
+                          std::move(prom));
+
+  std::string result = fut.get();
+  std::cout << "got from thread (promise): " << result << "\n";
+
+  tWithResult.join();
+
+  // ---- ЗАДАНИЕ 16: std::async ----
+  std::cout << "\n--- Блок 9: std::async ---\n";
+
+  std::future<std::string> fut2 = std::async(std::launch::async,
+                                             funcThreadReturning,
+                                             std::cref(args[1]),
+                                             std::ref(logger));
+
+  std::string result2 = fut2.get();
+  std::cout << "got from thread (async): " << result2 << "\n";
+
+  logger.writeLine("main: block 9 done");
   return 0;
 }

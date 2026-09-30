@@ -7,8 +7,9 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-std::atomic<int> counter{0};
 
+// ЗАДАНИЕ 20
+std::atomic<int> counter{0};
 
 Logger::Logger(const std::string& filename)
   : file_(filename, std::ios::out | std::ios::trunc)
@@ -18,11 +19,8 @@ Logger::Logger(const std::string& filename)
   }
 }
 
-Logger::~Logger() {
-  // std::ofstream closes the file automatically
-}
+Logger::~Logger() {}
 
-// Задание 6: возвращаем bool — true при успешной записи
 bool Logger::writeLine(const std::string& msg) {
   std::lock_guard<std::mutex> lock(mutex_);
   file_ << msg;
@@ -38,26 +36,83 @@ void about() {
   std::cout << "std::thread example\n";
 }
 
+// ---------------------------------------------------------------------------
+// Обычный поток
+// ---------------------------------------------------------------------------
 void funcThread(const ThreadArgs& args, Logger& logger) {
   for (int i = 0; i < COUNT_ITERATIONS; ++i) {
     std::ostringstream oss;
 
-    // Задание 12: добавляем std::this_thread::get_id()
     oss << "[tag = " << args.tag
         << "] std::thread::id = " << std::this_thread::get_id()
-        << " sys tid = "         << getThreadID()
-        << " pid = "             << ::getpid()
-        << " ppid = "            << ::getppid()
-        << " iter = "            << i;
+        << " sys tid = " << getThreadID()
+        << " pid = " << ::getpid()
+        << " ppid = " << ::getppid()
+        << " iter = " << i
+        << "\n";
 
-    // Задание 8: пишем через logger, результат не проверяем пока
     logger.writeLine(oss.str());
-    // ЗАДАНИЕ 20: 100000 инкрементов от каждого потока
-    for (int k = 0; k < 100000; ++k) {
-      counter++;
-    }
 
-    // imitation of useful work
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+
+  // ЗАДАНИЕ 20: 100000 инкрементов — один раз на поток (вне цикла)
+  for (int k = 0; k < 100000; ++k) {
+    counter++;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ЗАДАНИЕ 14/16: поток с promise
+// ---------------------------------------------------------------------------
+void funcThreadWithResult(const ThreadArgs& args,
+                          Logger& logger,
+                          std::promise<std::string> prom) {
+  int iterations_done = 0;
+
+  for (int i = 0; i < COUNT_ITERATIONS; ++i) {
+    std::ostringstream oss;
+
+    oss << "[tag = " << args.tag
+        << "] std::thread::id = " << std::this_thread::get_id()
+        << " sys tid = " << getThreadID()
+        << " iter = " << i
+        << " (with result)\n";
+
+    logger.writeLine(oss.str());
+    ++iterations_done;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  std::ostringstream res;
+  res << "thread " << args.tag
+      << " done, iterations = " << iterations_done;
+  prom.set_value(res.str());
+}
+
+// ---------------------------------------------------------------------------
+// ЗАДАНИЕ 16: вариант для std::async
+// ---------------------------------------------------------------------------
+std::string funcThreadReturning(const ThreadArgs& args, Logger& logger) {
+  int iterations_done = 0;
+
+  for (int i = 0; i < COUNT_ITERATIONS; ++i) {
+    std::ostringstream oss;
+
+    oss << "[tag = " << args.tag
+        << "] std::thread::id = " << std::this_thread::get_id()
+        << " sys tid = " << getThreadID()
+        << " (async)\n";
+
+    logger.writeLine(oss.str());
+    ++iterations_done;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  std::ostringstream res;
+  res << "async " << args.tag
+      << " done, iterations = " << iterations_done;
+  return res.str();
 }
